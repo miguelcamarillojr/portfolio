@@ -1,0 +1,337 @@
+/*
+  Layout values below were measured from the live Framer page at 1280px and 390px wide.
+  Type: 16px serif / 13px sans / 12px counter. Gutter 16px. Section gap 120px.
+*/
+:root {
+  --bg: #ffffff;
+  --ink: #000000;
+  --mute: #9a9a9a;
+  --line: #eaeaea;
+  --serif: "Cormorant Garamond", "Times New Roman", serif;
+  --sans: "Instrument Sans", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --gutter: 16px;
+  --gap: 4px;
+  /* Frame heights scale with the window so only about 2 to 3 frames show at once on desktop */
+  --strip-h: clamp(480px, 40vw, 960px);        /* medium (default) */
+  /* Uniform heights for now: small and large match medium. To bring the mixed sizes back, use these instead:
+       --h-s: calc(var(--strip-h) * 0.75);
+       --h-l: max(var(--strip-h), min(calc(var(--strip-h) * 1.15), 82vh)); */
+  --h-s: var(--strip-h);
+  --h-l: var(--strip-h);
+  --section-gap: 120px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  padding-block: 0;
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:focus-visible { outline: 1px solid currentColor; outline-offset: 3px; }
+img { display: block; max-width: 100%; }
+ul { list-style: none; }
+
+.serif, .label { font-family: var(--serif); font-size: 16px; line-height: 1.2; }
+
+/* ---------- Header ---------- */
+.top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  padding-top: 24px;
+  margin-bottom: 200px;
+}
+.intro { max-width: 448px; text-indent: 4em; }
+
+/* Four items spread across the right half: Featured, About, Email, clock */
+.top-right { display: flex; justify-content: space-between; align-items: flex-start; }
+.nav { display: contents; }
+.nav a, .foot-nav a { display: block; width: 55px; text-align: center; }
+
+.clock {
+  display: flex;
+  gap: 8px;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- Projects ---------- */
+.project { margin-bottom: var(--section-gap); }
+
+.counter { font-size: 12px; line-height: 1.2; margin-bottom: 16px; }
+
+/* The strip is a window. script.js slides the track inside it. */
+.strip {
+  /* Full bleed: cancel the page side padding so the carousel runs edge to edge */
+  margin-left: calc(-1 * max(var(--gutter), env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(var(--gutter), env(safe-area-inset-right, 0px)));
+  height: var(--strip-h);
+  overflow: hidden;
+  touch-action: pan-y;   /* vertical swipes scroll the page, horizontal drags move the strip */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.strip.max-s { height: var(--h-s); }
+.strip.max-l { height: var(--h-l); }
+.strip.dragging { cursor: grabbing; }
+.track {
+  display: flex;
+  align-items: flex-start;   /* frames hang from the top and finish at different heights */
+  gap: var(--gap);
+  height: 100%;
+  width: max-content;
+  will-change: transform;
+}
+
+/* Frames are 16:9 or 1:1 at the strip height. Images fill the frame (cover). */
+.slide {
+  flex: none;
+  transform: scale(var(--sq, 1));   /* script.js eases this to about 0.95 while dragging */
+  will-change: transform;
+  height: var(--strip-h);
+  aspect-ratio: var(--r, 1);
+  overflow: hidden;
+  background: #efefec;
+}
+.slide.s { height: var(--h-s); }
+.slide.l { height: var(--h-l); }
+.slide img, .slide video { width: 100%; height: 100%; object-fit: cover; -webkit-user-drag: none; }
+.slide video { pointer-events: none; background: #1a1a1a; }
+
+.ph {
+  width: 100%; height: 100%;
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: 12px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.38);
+  background: var(--tone, #efefec);
+}
+.ph.dark { color: rgba(255, 255, 255, 0.5); }
+
+.info {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 16px;
+  padding-bottom: 56px;
+  border-bottom: 1px solid var(--line);
+}
+.info > * { min-width: 0; }
+.info .sub { color: var(--mute); }
+.info .title { font-family: var(--serif); font-size: 16px; line-height: 1.2; }
+
+/* Project info above the carousel. Remove class="info-top" from #featured in index.html to put it back below. */
+.info-top .project {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 56px;
+  border-bottom: 1px solid var(--line);
+}
+.info-top .counter { order: 0; }
+.info-top .info { order: 1; margin-top: 0; margin-bottom: 40px; padding-bottom: 0; border-bottom: 0; }
+.info-top .strip { order: 2; }
+
+/* ---------- Rows (Capabilities, About, Connect) ---------- */
+.row { display: grid; grid-template-columns: 1fr 1fr; }
+.row + .row { margin-top: var(--section-gap); }
+.label { font-weight: 400; font-style: italic; }
+.row > * { min-width: 0; }
+
+.caps li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.caps li:first-child { padding-top: 0; }
+
+/* Index: full width, hairlines edge to edge, columns spread across the page */
+.idx .label { margin-bottom: 16px; }
+.idx + .row { margin-top: var(--section-gap); }
+.idx { padding-bottom: var(--section-gap); border-bottom: 1px solid var(--line); }
+.index-list li:last-child { border-bottom: 0; }
+.index-list li { border-bottom: 1px solid var(--line); }
+.index-list li:first-child { border-top: 1px solid var(--line); }
+.ix-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  padding: 10px 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.ix-row:hover .ix-name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.ix-row:focus-visible { outline: 1px solid currentColor; outline-offset: -1px; }
+.index-list .ix-cat { color: var(--mute); }
+.index-list .ix-year { grid-column: 4; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+  background: rgba(255, 255, 255, 0.97);
+}
+.lightbox.on { display: flex; }
+.lb-bar { display: flex; justify-content: space-between; align-items: flex-start; font-family: var(--serif); font-size: 16px; line-height: 1.2; }
+.lb-bar button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+.lb-bar button:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.lb-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 24px 0; cursor: pointer; }
+.lb-stage img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+.lb-cap { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; }
+.lb-cap .mute { color: var(--mute); }
+
+.about { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* Grey square holds the spot until assets/portrait.jpg exists */
+.portrait { grid-column: 1 / -1; width: 56px; height: 56px; background: #d9d9d9; overflow: hidden; }
+.portrait img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; }
+.about-copy { display: contents; }
+
+.connect { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.connect a { display: block; line-height: 19px; }
+
+/* ---------- Footer ---------- */
+.foot { margin-top: var(--section-gap); }
+.foot hr { border: 0; border-top: 1px solid var(--line); }
+.foot-row {
+  display: flex;
+  flex-wrap: wrap;      /* copyright drops under the links once the row runs out of room */
+  row-gap: 80px;
+  padding: 200px 0 24px;
+}
+.foot-nav, .copy { flex: 1 1 50%; min-width: max-content; }
+.foot-nav { display: flex; gap: 80px; }
+
+/* ---------- Mobile (Framer switches below tablet width) ---------- */
+@media (max-width: 809px) {
+  :root { --strip-h: 320px; --h-s: 320px; --h-l: 320px; }   /* mixed sizes: 240px and 400px */
+
+  .top { grid-template-columns: 1fr; row-gap: 48px; }
+  .intro { max-width: none; }
+
+  .info { grid-template-columns: 1fr 1fr; row-gap: 40px; }
+  .info .head { grid-column: 1 / -1; }
+  .info .desc { grid-column: 1 / -1; }
+
+  .row { grid-template-columns: 25% 1fr; }
+  .about { grid-template-columns: 1fr; }
+  .ix-row { grid-template-columns: 1fr auto; row-gap: 2px; }
+  .index-list .ix-cat { grid-column: 1 / -1; grid-row: 2; }
+  .index-list .ix-year { grid-row: 1; grid-column: 2; }
+  .connect { grid-template-columns: 1fr; }
+}
+
+/* ---------- Effects ---------- */
+
+/* "Drag" cursor over the carousel (desktop with a mouse only) */
+.has-drag-cursor .strip,
+.has-drag-cursor .strip *,
+.has-drag-cursor .strip.dragging,
+.has-drag-cursor .strip.dragging * { cursor: none; }
+.drag-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  width: 72px;
+  height: 72px;
+  pointer-events: none;
+  will-change: transform;
+}
+.drag-cursor span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #000000;
+  font: 12px/1 var(--sans);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.drag-cursor.on span { opacity: 1; transform: scale(1); }
+.drag-cursor.on.down span { transform: scale(0.86); }
+
+/* Image peek: a small image follows the cursor over each capability (desktop with a mouse only) */
+.caps li { cursor: default; }
+.peek {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  width: 240px;
+  height: 160px;
+  display: none;
+  pointer-events: none;
+  background: #efefec;
+  will-change: transform;
+}
+.peek.on { display: block; }
+.peek img { width: 100%; height: 100%; object-fit: cover; }
+
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .drag-cursor span { transition: none; }
+}
+
+/* Video frames with a full version */
+.slide.has-full { position: relative; }
+.slide .watch {
+  position: absolute; left: 12px; bottom: 12px;
+  font: 12px/1 var(--sans); color: #fff;
+  padding: 7px 10px; border-radius: 999px;
+  background: rgba(20, 20, 20, 0.55);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+/* Viewer (carousel frames) */
+.vlb {
+  position: fixed; inset: 0; z-index: 110; display: none; flex-direction: column;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+  background: rgba(255, 255, 255, 0.98);
+}
+.vlb.on { display: flex; }
+.vlb-bar { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; font-family: var(--serif); font-size: 16px; line-height: 1.2; white-space: pre; }
+.vlb-nav { display: flex; gap: 20px; }
+.vlb-bar button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+.vlb-bar button:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.vlb-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 24px 0 0; }
+.vlb-stage img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; cursor: pointer; }
+.vlb-stage video { max-width: 100%; max-height: 100%; width: auto; height: auto; background: #000; outline: none; }
+
+/* Inline icons in the intro line (drawn as SVG so they never fall back to a missing-glyph box) */
+.intro .ico { display: inline-block; width: 0.72em; height: 0.72em; vertical-align: -0.02em; margin: 0 0.1em; }
+
+.idx .label { max-width: none; margin-bottom: 0; text-wrap: balance; }
+@media (min-width: 810px) { .idx .label { white-space: nowrap; } }
+.idx .label a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+/* Awards: same rows as Capabilities, three columns on desktop */
+.awards li { display: grid; grid-template-columns: 0.8fr 1.3fr 1.1fr; column-gap: 16px; }
+.awards .aw-by { color: var(--mute); }
+@media (max-width: 809px) {
+  .awards li { grid-template-columns: 1fr; row-gap: 2px; padding: 10px 0; }
+  .awards li:first-child { padding-top: 0; }
+}
